@@ -10,11 +10,34 @@ const pool = new Pool({
 	port: 5432,
 });
 
-// Rest of the code remains the same
-const getAccounts = async () => {
+// Get a list of all accounts (will delete later)
+// const getAccounts = async () => {
+// 	try {
+// 		return await new Promise(function (resolve, reject) {
+// 			pool.query('SELECT * FROM accounts', (error: any, results: any) => {
+// 				if (error) {
+// 					reject(error);
+// 				}
+// 				if (results && results.rows) {
+// 					resolve(results.rows);
+// 				} else {
+// 					reject(new Error('No results found'));
+// 				}
+// 			});
+// 		});
+// 	} catch (error_1) {
+// 		console.error(error_1);
+// 		throw new Error('Internal server error');
+// 	}
+// };
+
+// Get individual account information
+const getAccount = (id: number) => {
+	const accountNumber = id;
 	try {
-		return await new Promise(function (resolve, reject) {
-			pool.query('SELECT * FROM accounts', (error: any, results: any) => {
+		return new Promise(function (resolve, reject) {
+			const query = `SELECT * FROM accounts WHERE account_number = $1`;
+			pool.query(query, [accountNumber], (error: any, results: any) => {
 				if (error) {
 					reject(error);
 				}
@@ -31,8 +54,56 @@ const getAccounts = async () => {
 	}
 };
 
-//export default { getAccounts };
+// Deposit money into an account
+const depositIntoAccount = (id: number, amount: number) => {
+	const accountNumber = id;
+	const query = `UPDATE accounts SET amount = amount + $2 WHERE account_number = $1 RETURNING *`;
+
+	try {
+		return new Promise(function (resolve, reject) {
+			pool.query(query, [accountNumber, amount], (error: any, results: any) => {
+				if (error) {
+					reject(error);
+				}
+				if (results && results.rows) {
+					resolve(results.rows);
+				} else {
+					reject(new Error('No results found'));
+				}
+			});
+		});
+	} catch (error_1) {
+		console.error(error_1);
+		throw new Error('Internal server error');
+	}
+};
+
+// Withdraw money from an account
+const withdrawFromAccount = (id: number, amount: number) => {
+	const accountNumber = id;
+	const query = `UPDATE accounts SET amount = amount - $2 WHERE account_number = $1 RETURNING *`;
+
+	try {
+		return new Promise(function (resolve, reject) {
+			pool.query(query, [accountNumber, amount], (error: any, results: any) => {
+				if (error) {
+					reject(error);
+				}
+				if (results && results.rows) {
+					resolve(results.rows);
+				} else {
+					reject(new Error('No results found'));
+				}
+			});
+		});
+	} catch (error_1) {
+		console.error(error_1);
+		throw new Error('Internal server error');
+	}
+};
 
 module.exports = {
-	getAccounts,
+	getAccount,
+	depositIntoAccount,
+	withdrawFromAccount,
 };

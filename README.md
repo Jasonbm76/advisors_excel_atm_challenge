@@ -1,7 +1,7 @@
 ### Setup
 
 1. Clone the repo
-2. Run `yarn` to instal dependencies
+2. Run `yarn` to install dependencies
 
 ### Running the app
 

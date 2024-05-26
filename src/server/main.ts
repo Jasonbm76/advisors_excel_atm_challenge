@@ -15,9 +15,11 @@ app.use(function (req, res, next) {
 	next();
 });
 
-app.get('/', (req, res) => {
+// Get an individual account
+app.get('/account/:id', (req, res) => {
+	const id = req.params.id;
 	account_model
-		.getAccounts()
+		.getAccount(id)
 		.then((response: any) => {
 			res.status(200).send(response);
 		})
@@ -26,8 +28,32 @@ app.get('/', (req, res) => {
 		});
 });
 
-app.get('/hello', (_, res) => {
-	res.send('Hello Vite + React + TypeScript!');
+// Update by depositing into an individual account
+app.put('/account/:id/deposit/:amount', (req, res) => {
+	const id = req.params.id;
+	const amount = req.body.amount;
+	account_model
+		.depositIntoAccount(id, amount)
+		.then((response: any) => {
+			res.status(200).send(response);
+		})
+		.catch((error: any) => {
+			res.status(500).send(error);
+		});
+});
+
+// Update by withdrawing from an individual account
+app.put('/account/:id/withdraw/:amount', (req, res) => {
+	const id = req.params.id;
+	const amount = req.body.amount;
+	account_model
+		.withdrawFromAccount(id, amount)
+		.then((response: any) => {
+			res.status(200).send(response);
+		})
+		.catch((error: any) => {
+			res.status(500).send(error);
+		});
 });
 
 ViteExpress.listen(app, 3000, () =>
