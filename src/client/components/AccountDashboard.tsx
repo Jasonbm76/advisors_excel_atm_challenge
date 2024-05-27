@@ -12,13 +12,22 @@ import {
 	NumberInputStepper,
 	NumberIncrementStepper,
 	NumberDecrementStepper,
+	Center,
+	Square,
+	Text,
+	Spacer,
 } from '@chakra-ui/react';
+import { UserContext } from '../context/UserContext';
 
-import { AuthContext } from '../context/AuthContext';
+//import { AuthContext } from '../context/AuthContext';
 
 const AccountDashboard = () => {
-	const authContext = useContext(AuthContext);
+	//const authContext = useContext(AuthContext);
 
+	const userContext = useContext(UserContext);
+	//console.log('User Context: ', userContext);
+
+	//const [userName, setUserName] = useState(userContext?.user?.name);
 	const [account, setAccount] = useState<string[]>([]);
 	const [accountId, setAccountId] = useState<number>(); // change to null later
 	const [depositAmount, setDepositAmount] = useState<number>(0); // change to 0 later
@@ -146,7 +155,7 @@ const AccountDashboard = () => {
 	// }, []);
 
 	return (
-		authContext.isLoggedIn && (
+		userContext?.user?.isLoggedIn && (
 			<Flex
 				width='full'
 				align='center'
@@ -158,7 +167,17 @@ const AccountDashboard = () => {
 					borderRadius={8}
 					boxShadow='lg'>
 					<Box textAlign='center'>
-						<Heading>Bank Account Dashboard</Heading>
+						<Heading mb='5'>Bank Account Dashboard</Heading>
+
+						<Flex>
+							<Box flex='1'>
+								<Text align={'left'}>{userContext?.user?.name}</Text>
+							</Box>
+							<Spacer />
+							<Center w='150px'>
+								<Text>Account Number: {userContext?.user?.accountNumber}</Text>
+							</Center>
+						</Flex>
 					</Box>
 				</Box>
 

@@ -13,24 +13,35 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper,
 } from '@chakra-ui/react';
-
-import { AuthContext } from '../context/AuthContext';
+import { UserContext } from '../context/UserContext';
 
 const LoginForm = () => {
-	const authContext = useContext(AuthContext);
-
-	const loginHandler = () => {
-		authContext.login();
-	};
-	const logoutHandler = () => {
-		authContext.logout();
-	};
+	const userContext = useContext(UserContext);
 
 	const [accountNumber, setAccountNumber] = useState(1); // default to account 1
 
+	// Get account information for an account
+	function getAccount() {
+		fetch(`http://localhost:3000/account/${accountNumber}`)
+			.then((response) => {
+				return response.text();
+			})
+			.then((data) => {
+				let accountObject = JSON.parse(data);
+
+				userContext.setUser({
+					name: accountObject[0].name,
+					accountNumber: accountNumber,
+					creditLimit: accountObject[0].creditLimit,
+					balance: accountObject[0].balance,
+					isLoggedIn: true,
+				});
+			});
+	}
+
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		loginHandler();
+		getAccount();
 	};
 
 	const handleAccountNumberChange = (value: number) => {
@@ -38,7 +49,7 @@ const LoginForm = () => {
 	};
 
 	return (
-		!authContext.isLoggedIn && (
+		!userContext?.user?.isLoggedIn && (
 			<Flex
 				width='full'
 				align='center'
