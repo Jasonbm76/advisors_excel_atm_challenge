@@ -29,7 +29,7 @@ app.get('/account/:id', (req, res) => {
 });
 
 // Update by depositing into an individual account
-app.put('/account/:id/deposit/:amount', (req, res) => {
+app.post('/account/:id/deposit/:amount', (req, res) => {
 	const id = req.params.id;
 	const amount = req.body.amount;
 	account_model
@@ -43,7 +43,7 @@ app.put('/account/:id/deposit/:amount', (req, res) => {
 });
 
 // Update by withdrawing from an individual account
-app.put('/account/:id/withdraw/:amount', (req, res) => {
+app.post('/account/:id/withdraw/:amount', (req, res) => {
 	const id = req.params.id;
 	const amount = req.body.amount;
 	account_model

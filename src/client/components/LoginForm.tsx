@@ -33,7 +33,7 @@ const LoginForm = () => {
 					name: accountObject[0].name,
 					accountNumber: accountNumber,
 					creditLimit: accountObject[0].creditLimit,
-					balance: accountObject[0].balance,
+					balance: accountObject[0].amount,
 					isLoggedIn: true,
 				});
 			});
@@ -56,7 +56,7 @@ const LoginForm = () => {
 				justifyContent='center'>
 				<Box
 					p={8}
-					maxWidth='500px'
+					maxWidth='480px'
 					borderWidth={1}
 					borderRadius={8}
 					boxShadow='lg'>
@@ -86,6 +86,7 @@ const LoginForm = () => {
 							<Button
 								width='full'
 								mt={4}
+								colorScheme='blue'
 								type='submit'>
 								Sign In
 							</Button>
