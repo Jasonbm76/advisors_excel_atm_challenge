@@ -43,11 +43,25 @@ app.post('/account/:id/deposit/:amount', (req, res) => {
 });
 
 // Update by withdrawing from an individual account
-app.post('/account/:id/withdraw/:amount', (req, res) => {
+app.post('/account/:id/withdrawal/:amount', (req, res) => {
 	const id = req.params.id;
 	const amount = req.body.amount;
 	account_model
-		.withdrawFromAccount(id, amount)
+		.withdrawalFromAccount(id, amount)
+		.then((response: any) => {
+			res.status(200).send(response);
+		})
+		.catch((error: any) => {
+			res.status(500).send(error);
+		});
+});
+
+// Update by making a payment into a credit card account
+app.post('/account/:id/payment/:amount', (req, res) => {
+	const id = req.params.id;
+	const amount = req.body.amount;
+	account_model
+		.makePaymentIntoAccount(id, amount)
 		.then((response: any) => {
 			res.status(200).send(response);
 		})

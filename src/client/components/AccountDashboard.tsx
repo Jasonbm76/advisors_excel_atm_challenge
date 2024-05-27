@@ -1,75 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { Box, Flex, Grid, GridItem, Heading } from '@chakra-ui/react';
 import { UserContext } from '../context/UserContext';
 import { AccountTable } from './AccountTable';
 import DepositForm from './DepositForm';
-import WithdrawForm from './WithdrawForm';
+import WithdrawalForm from './WithdrawalForm';
+import MakePaymentForm from './MakePaymentForm';
 
 const AccountDashboard = () => {
 	const userContext = useContext(UserContext);
 
-	//const [account, setAccount] = useState<string[]>([]);
-	//const [accountId, setAccountId] = useState<number>(0);
-	const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
+	const [accountType, setAccountType] = useState('' as string);
 
-	// Get account information for an account
-	// function getAccount() {
-	// 	fetch(`http://localhost:3000/account/${accountId}`)
-	// 		.then((response) => {
-	// 			return response.text();
-	// 		})
-	// 		.then((data) => {
-	// 			setAccount([data]);
-	// 			console.log('Account', account);
-	// 			//setAccountId(userContext?.user?.accountNumber);
-	// 		});
-	// }
-
-	// Widthdraw money from an account
-	function withdrawMoney(amount: number) {
-		fetch(
-			`http://localhost:3000/account/${userContext?.user?.accountNumber}/withdraw/${amount}`,
-			{
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ amount }),
-			}
-		)
-			.then((response) => {
-				return response.text();
-			})
-			.then((data) => {
-				//getAccount();
-			});
-	}
-
-	// function WithdrawForm() {
-	// 	return (
-	// 		<form>
-	// 			<label>
-	// 				Withdraw Amount:
-	// 				<input
-	// 					type='text'
-	// 					name='withdraw'
-	// 					value={withdrawAmount}
-	// 					onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-	// 				/>
-	// 			</label>
-	// 			<input
-	// 				type='submit'
-	// 				value='Withdraw'
-	// 				onClick={() => withdrawMoney(withdrawAmount)}
-	// 			/>
-	// 		</form>
-	// 	);
-	// }
-
-	// useEffect(() => {
-	// 	setAccountId(userContext?.user?.accountNumber);
-	// }, [userContext]);
+	// We need to get the account type to determine whether to show checking or credit options
+	useEffect(() => {
+		if (userContext.user) {
+			setAccountType(userContext?.user?.type);
+			console.log(userContext.user);
+		}
+	}, [userContext]);
 
 	return (
 		userContext?.user?.isLoggedIn && (
@@ -90,26 +39,36 @@ const AccountDashboard = () => {
 					<Box textAlign='center'>
 						<Heading mb='5'>Bank Account Dashboard</Heading>
 						<AccountTable />
-						<Grid
-							templateColumns='repeat(5, 1fr)'
-							gap={4}
-							mt={6}>
-							<GridItem colSpan={2}>
-								<WithdrawForm />
-							</GridItem>
-							<GridItem
-								colStart={4}
-								colEnd={6}>
-								<DepositForm />
-							</GridItem>
-						</Grid>
+
+						{accountType !== 'credit' ? (
+							<Grid
+								templateColumns='repeat(5, 1fr)'
+								gap={4}
+								mt={6}>
+								<GridItem colSpan={2}>
+									<WithdrawalForm />
+								</GridItem>
+								<GridItem
+									colStart={4}
+									colEnd={6}>
+									<DepositForm />
+								</GridItem>
+							</Grid>
+						) : (
+							<Grid
+								templateColumns='repeat(5, 1fr)'
+								gap={4}
+								mt={6}>
+								<GridItem colSpan={2}></GridItem>
+								<GridItem
+									colStart={4}
+									colEnd={6}>
+									<MakePaymentForm />
+								</GridItem>
+							</Grid>
+						)}
 					</Box>
 				</Box>
-
-				{/*
-				<DepositForm />
-				<WithdrawForm /> 
-				*/}
 			</Flex>
 		)
 	);

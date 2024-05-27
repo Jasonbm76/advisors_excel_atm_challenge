@@ -5,6 +5,7 @@ type AuthUser = {
 	accountNumber: number;
 	creditLimit: number;
 	balance: number;
+	type: string;
 };
 
 export type UserContextType = {

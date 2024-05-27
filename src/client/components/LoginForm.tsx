@@ -34,6 +34,7 @@ const LoginForm = () => {
 					accountNumber: accountNumber,
 					creditLimit: accountObject[0].creditLimit,
 					balance: accountObject[0].amount,
+					type: accountObject[0].type,
 					isLoggedIn: true,
 				});
 			});

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -12,8 +12,9 @@ import {
 
 import { UserContext } from '../context/UserContext.js';
 
-const DepositForm = () => {
+const MakePaymentForm = () => {
 	const userContext = useContext(UserContext);
+	const [maxPaymentAmount, setMaxPaymentAmount] = useState(0);
 
 	const {
 		register,
@@ -21,10 +22,19 @@ const DepositForm = () => {
 		formState: { errors },
 	} = useForm();
 
-	// Deposit money into an account
-	function depositMoney(amount: number) {
+	// We need to get the amount due on the credit card to determine the max value for the input
+	useEffect(() => {
+		if (userContext.user) {
+			let balance = parseInt(userContext?.user?.balance);
+			setMaxPaymentAmount(Math.abs(balance));
+			console.log(userContext.user);
+		}
+	}, [userContext]);
+
+	// MakePayment money into an account
+	function makePayment(amount: number) {
 		fetch(
-			`http://localhost:3000/account/${userContext?.user?.accountNumber}/deposit/${amount}`,
+			`http://localhost:3000/account/${userContext?.user?.accountNumber}/payment/${amount}`,
 			{
 				method: 'POST',
 				headers: {
@@ -51,32 +61,35 @@ const DepositForm = () => {
 	}
 
 	// Submit form after successful validation
-	const onSubmit = (data: { depositAmount: number }) => {
-		const depositAmountInput = document.querySelector(
-			'#depositAmount'
+	const onSubmit = (data: { makePaymentAmount: number }) => {
+		const makePaymentAmountInput = document.querySelector(
+			'#makePaymentAmount'
 		) as HTMLInputElement;
-		depositAmountInput.value = '0';
-		depositMoney(data.depositAmount);
+		makePaymentAmountInput.value = '0';
+		makePayment(data.makePaymentAmount);
 	};
 
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<FormControl>
-					<FormLabel>Make Deposit</FormLabel>
+					<FormLabel>Make Payment</FormLabel>
 					<Stack
 						direction={['column', 'row']}
 						spacing='10px'>
 						<Input
-							{...register('depositAmount', { min: 1, max: 1000 })}
+							{...register('makePaymentAmount', {
+								min: 1,
+								max: maxPaymentAmount,
+							})}
 							type='number'
-							id='depositAmount'
-							placeholder='Enter deposit amount'
+							id='makePaymentAmount'
+							placeholder='Enter payment amount'
 						/>
 
 						<Button
 							type='submit'
-							value='Deposit'
+							value='MakePayment'
 							colorScheme='blue'>
 							Submit
 						</Button>
@@ -84,8 +97,10 @@ const DepositForm = () => {
 					<FormHelperText
 						fontSize='xs'
 						color='#ff0000'>
-						{errors.depositAmount && (
-							<span>You may only deposit between $1 and $1,000 dollars</span>
+						{errors.makePaymentAmount && (
+							<span>
+								{`Payment must be between $1 and $${maxPaymentAmount.toLocaleString()} dollars`}
+							</span>
 						)}
 					</FormHelperText>
 				</FormControl>
@@ -94,4 +109,4 @@ const DepositForm = () => {
 	);
 };
 
-export default DepositForm;
+export default MakePaymentForm;
