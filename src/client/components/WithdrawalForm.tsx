@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
+	Box,
 	Button,
 	FormControl,
 	FormLabel,
@@ -31,16 +32,30 @@ const WithdrawalForm = () => {
 	useEffect(() => {
 		if (userContext.user) {
 			let balance = parseInt(userContext?.user?.balance);
-			setMaxWithdrawalAmount(
-				(userContext?.user?.type !== 'credit'
-					? Math.abs(balance)
-					: userContext?.user?.creditLimit) -
-					Math.abs(userContext?.user?.balance)
-			);
+			switch (userContext?.user?.type) {
+				case 'credit':
+					setMaxWithdrawalAmount(
+						userContext?.user?.creditLimit -
+							Math.abs(userContext?.user?.balance)
+					);
+					break;
+				default:
+					// User has a balance higher than the single withdrawal limit
+					if (balance > singleWithdrawalLimit) {
+						setMaxWithdrawalAmount(singleWithdrawalLimit);
+					}
+					break;
+			}
+			// setMaxWithdrawalAmount(
+			// 	(userContext?.user?.type !== 'credit'
+			// 		? Math.abs(balance)
+			// 		: userContext?.user?.creditLimit) -
+			// 		Math.abs(userContext?.user?.balance)
+			// );
 			setAccountType(userContext?.user?.type);
 
-			console.log('accountType (withdrawalForm)', accountType);
-			console.log(userContext.user);
+			//console.log('accountType (withdrawalForm)', accountType);
+			//console.log(userContext.user);
 		}
 	}, [userContext]);
 
@@ -73,12 +88,17 @@ const WithdrawalForm = () => {
 			});
 	}
 
+	// Use this function to make sure withdrawals are in multiples of 5
+	function roundUpToMultipleOf5(num) {
+		return Math.ceil(num / 5) * 5;
+	}
+
 	// Submit form after successful validation
 	const onSubmit = (data: { withdrawalAmount: number }) => {
 		const withdrawalAmountInput = document.querySelector(
 			'#withdrawalAmount'
 		) as HTMLInputElement;
-		withdrawalAmountInput.value = '0';
+		withdrawalAmountInput.value = '';
 		withdrawalMoney(data.withdrawalAmount);
 	};
 
@@ -93,8 +113,9 @@ const WithdrawalForm = () => {
 							spacing='10px'>
 							<Input
 								{...register('withdrawalAmount', {
-									min: 1,
+									min: 5,
 									max: maxWithdrawalAmount,
+									pattern: /^[0-9]*[05]$/,
 								})}
 								type='number'
 								id='withdrawalAmount'
@@ -114,11 +135,25 @@ const WithdrawalForm = () => {
 							textAlign={'left'}>
 							{errors.withdrawalAmount && (
 								<span>
-									{`Amount must be between $1 and $${maxWithdrawalAmount.toLocaleString()} dollars`}
+									{`Amount must be between $5 and $${maxWithdrawalAmount.toLocaleString()} dollars in increments of $5.`}
 								</span>
 							)}
 						</FormHelperText>
 					</FormControl>
+
+					<Box
+						w='100%'
+						p={4}>
+						<ul className='withdrawal-reqs'>
+							<li>Withdrawal must be in increments of $5</li>
+							<li className={accountType === 'credit' ? 'd-none' : ''}>
+								Single Withdrawal Limit ${singleWithdrawalLimit}
+							</li>
+							<li className={accountType === 'credit' ? 'd-none' : ''}>
+								Daily Withdrawal Limit ${dailyWithdrawalLimit}
+							</li>
+						</ul>
+					</Box>
 				</form>
 			) : (
 				<>

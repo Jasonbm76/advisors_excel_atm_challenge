@@ -13,6 +13,8 @@ export default function ThemeToggler() {
 				icon={colorMode === 'light' ? <FaMoon /> : <FaSun />}
 				onClick={toggleColorMode}
 				variant='ghost'
+				aria-label='Toggle Theme'
+				title={'Toggle Theme'}
 			/>
 		</Box>
 	);

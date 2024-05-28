@@ -7,6 +7,21 @@
 	text-align: left;
 }
 
+ul {
+	&.deposit-reqs,
+	&.withdrawal-reqs {
+		font-size: 13px;
+	}
+}
+
+.capitalize {
+	text-transform: capitalize;
+}
+
+.d-none {
+	display: none;
+}
+
 // html {
 // 	scroll-behavior: smooth;
 // }

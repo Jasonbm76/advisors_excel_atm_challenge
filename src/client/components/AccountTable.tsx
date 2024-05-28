@@ -37,7 +37,7 @@ export const AccountTable = () => {
 				colorScheme='blue'>
 				<Thead>
 					<Tr>
-						<Th>Account</Th>
+						<Th textAlign={'center'}>Account</Th>
 						<Th>Name</Th>
 						<Th>Type</Th>
 						{accountType === 'credit' && <Th isNumeric>Credit Limit</Th>}
@@ -46,9 +46,9 @@ export const AccountTable = () => {
 				</Thead>
 				<Tbody>
 					<Tr>
-						<Td>{userContext?.user?.accountNumber}</Td>
+						<Td textAlign={'center'}>{userContext?.user?.accountNumber}</Td>
 						<Td>{userContext?.user?.name}</Td>
-						<Td>{userContext?.user?.type}</Td>
+						<Td className='capitalize'>{userContext?.user?.type}</Td>
 						{accountType === 'credit' && (
 							<Td isNumeric>
 								{USDollar.format(userContext?.user?.creditLimit)}

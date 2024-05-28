@@ -1,6 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { Box, Flex, Grid, GridItem, Heading } from '@chakra-ui/react';
+import {
+	Box,
+	Flex,
+	Grid,
+	GridItem,
+	Heading,
+	Link,
+	Spacer,
+} from '@chakra-ui/react';
 import { UserContext } from '../context/UserContext';
 import { AccountTable } from './AccountTable';
 import DepositForm from './DepositForm';
@@ -11,6 +19,17 @@ const AccountDashboard = () => {
 	const userContext = useContext(UserContext);
 
 	const [accountType, setAccountType] = useState('' as string);
+
+	function handleLogoutClick() {
+		userContext.setUser({
+			name: '',
+			accountNumber: 0,
+			creditLimit: 0,
+			balance: 0,
+			type: '',
+			isLoggedIn: false,
+		});
+	}
 
 	// We need to get the account type to determine whether to show checking or credit options
 	useEffect(() => {
@@ -26,8 +45,7 @@ const AccountDashboard = () => {
 				width='full'
 				align='center'
 				justifyContent='center'
-				margin='auto'
-				width='80%'>
+				margin='auto'>
 				<Box
 					p={8}
 					maxWidth='840px'
@@ -37,38 +55,36 @@ const AccountDashboard = () => {
 					borderRadius={8}
 					boxShadow='lg'>
 					<Box textAlign='center'>
-						<Heading mb='5'>Bank Account Dashboard</Heading>
+						<Flex align={'center'}>
+							<Box p='1'>
+								<Heading>Bank Account Dashboard</Heading>
+							</Box>
+							<Spacer />
+							<Box p='1'>
+								<Link
+									fontSize='xs'
+									title={'Logout'}
+									onClick={handleLogoutClick}>
+									LOGOUT
+								</Link>
+							</Box>
+						</Flex>
+
 						<AccountTable />
 
-						{accountType !== 'credit' ? (
-							<Grid
-								templateColumns='repeat(5, 1fr)'
-								gap={4}
-								mt={6}>
-								<GridItem colSpan={2}>
-									<WithdrawalForm />
-								</GridItem>
-								<GridItem
-									colStart={4}
-									colEnd={6}>
-									<DepositForm />
-								</GridItem>
-							</Grid>
-						) : (
-							<Grid
-								templateColumns='repeat(5, 1fr)'
-								gap={4}
-								mt={6}>
-								<GridItem colSpan={2}>
-									<WithdrawalForm />
-								</GridItem>
-								<GridItem
-									colStart={4}
-									colEnd={6}>
-									<MakePaymentForm />
-								</GridItem>
-							</Grid>
-						)}
+						<Grid
+							templateColumns='repeat(5, 1fr)'
+							gap={4}
+							mt={6}>
+							<GridItem colSpan={2}>
+								<WithdrawalForm />
+							</GridItem>
+							<GridItem
+								colStart={4}
+								colEnd={6}>
+								<DepositForm />
+							</GridItem>
+						</Grid>
 					</Box>
 				</Box>
 			</Flex>
