@@ -32,7 +32,7 @@ const LoginForm = () => {
 				userContext.setUser({
 					name: accountObject[0].name,
 					accountNumber: accountNumber,
-					creditLimit: accountObject[0].creditLimit,
+					creditLimit: accountObject[0].credit_limit,
 					balance: accountObject[0].amount,
 					type: accountObject[0].type,
 					isLoggedIn: true,

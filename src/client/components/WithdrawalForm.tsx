@@ -6,6 +6,7 @@ import {
 	FormControl,
 	FormLabel,
 	FormHelperText,
+	Heading,
 	Input,
 	Stack,
 } from '@chakra-ui/react';
@@ -16,6 +17,9 @@ const WithdrawalForm = () => {
 	const userContext = useContext(UserContext);
 
 	const [maxWithdrawalAmount, setMaxWithdrawalAmount] = useState(0);
+	const [singleWithdrawalLimit, setSingleWithdrawalLimit] = useState(200);
+	const [dailyWithdrawalLimit, setDailyWithdrawalLimit] = useState(400);
+	const [accountType, setAccountType] = useState('' as string);
 
 	const {
 		register,
@@ -27,12 +31,20 @@ const WithdrawalForm = () => {
 	useEffect(() => {
 		if (userContext.user) {
 			let balance = parseInt(userContext?.user?.balance);
-			setMaxWithdrawalAmount(Math.abs(balance));
+			setMaxWithdrawalAmount(
+				(userContext?.user?.type !== 'credit'
+					? Math.abs(balance)
+					: userContext?.user?.creditLimit) -
+					Math.abs(userContext?.user?.balance)
+			);
+			setAccountType(userContext?.user?.type);
+
+			console.log('accountType (withdrawalForm)', accountType);
 			console.log(userContext.user);
 		}
 	}, [userContext]);
 
-	// Withdrawal money into an account
+	// Withdrawal money from an account
 	function withdrawalMoney(amount: number) {
 		fetch(
 			`http://localhost:3000/account/${userContext?.user?.accountNumber}/withdrawal/${amount}`,
@@ -53,7 +65,7 @@ const WithdrawalForm = () => {
 				userContext.setUser({
 					name: accountObject[0].name,
 					accountNumber: userContext.user.accountNumber,
-					creditLimit: accountObject[0].creditLimit,
+					creditLimit: accountObject[0].credit_limit,
 					balance: accountObject[0].amount,
 					type: accountObject[0].type,
 					isLoggedIn: true,
@@ -72,40 +84,53 @@ const WithdrawalForm = () => {
 
 	return (
 		<div>
-			<form onSubmit={handleSubmit(onSubmit)}>
-				<FormControl>
-					<FormLabel>Make Withdrawal</FormLabel>
-					<Stack
-						direction={['column', 'row']}
-						spacing='10px'>
-						<Input
-							{...register('withdrawalAmount', {
-								min: 1,
-								max: maxWithdrawalAmount,
-							})}
-							type='number'
-							id='withdrawalAmount'
-							placeholder='Enter withdrawal amount'
-						/>
+			{maxWithdrawalAmount > 0 ? (
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<FormControl>
+						<FormLabel>Make Withdrawal</FormLabel>
+						<Stack
+							direction={['column', 'row']}
+							spacing='10px'>
+							<Input
+								{...register('withdrawalAmount', {
+									min: 1,
+									max: maxWithdrawalAmount,
+								})}
+								type='number'
+								id='withdrawalAmount'
+								placeholder='Enter withdrawal amount'
+							/>
 
-						<Button
-							type='submit'
-							value='Withdrawal'
-							colorScheme='blue'>
-							Submit
-						</Button>
-					</Stack>
-					<FormHelperText
-						fontSize='xs'
-						color='#ff0000'>
-						{errors.withdrawalAmount && (
-							<span>
-								{`Amount must be between $1 and $${maxWithdrawalAmount.toLocaleString()} dollars`}
-							</span>
-						)}
-					</FormHelperText>
-				</FormControl>
-			</form>
+							<Button
+								type='submit'
+								value='Withdrawal'
+								colorScheme='blue'>
+								Submit
+							</Button>
+						</Stack>
+						<FormHelperText
+							fontSize='xs'
+							color='#ff0000'
+							textAlign={'left'}>
+							{errors.withdrawalAmount && (
+								<span>
+									{`Amount must be between $1 and $${maxWithdrawalAmount.toLocaleString()} dollars`}
+								</span>
+							)}
+						</FormHelperText>
+					</FormControl>
+				</form>
+			) : (
+				<>
+					<FormLabel>Make Withdrawal</FormLabel>
+					<Heading
+						as='h6'
+						size='xs'>
+						Withdrawal is not available for this account due to balance being
+						$0.
+					</Heading>
+				</>
+			)}
 		</div>
 	);
 };

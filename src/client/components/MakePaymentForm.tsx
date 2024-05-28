@@ -27,7 +27,7 @@ const MakePaymentForm = () => {
 		if (userContext.user) {
 			let balance = parseInt(userContext?.user?.balance);
 			setMaxPaymentAmount(Math.abs(balance));
-			console.log(userContext.user);
+			//console.log(userContext.user);
 		}
 	}, [userContext]);
 
@@ -52,7 +52,7 @@ const MakePaymentForm = () => {
 				userContext.setUser({
 					name: accountObject[0].name,
 					accountNumber: userContext.user.accountNumber,
-					creditLimit: accountObject[0].creditLimit,
+					creditLimit: accountObject[0].credit_limit,
 					balance: accountObject[0].amount,
 					type: accountObject[0].type,
 					isLoggedIn: true,
@@ -73,7 +73,7 @@ const MakePaymentForm = () => {
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<FormControl>
-					<FormLabel>Make Payment</FormLabel>
+					<FormLabel>Make Credit Card Payment</FormLabel>
 					<Stack
 						direction={['column', 'row']}
 						spacing='10px'>
@@ -96,7 +96,8 @@ const MakePaymentForm = () => {
 					</Stack>
 					<FormHelperText
 						fontSize='xs'
-						color='#ff0000'>
+						color='#ff0000'
+						textAlign={'left'}>
 						{errors.makePaymentAmount && (
 							<span>
 								{`Payment must be between $1 and $${maxPaymentAmount.toLocaleString()} dollars`}

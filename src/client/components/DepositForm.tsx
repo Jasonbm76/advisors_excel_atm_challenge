@@ -42,7 +42,7 @@ const DepositForm = () => {
 				userContext.setUser({
 					name: accountObject[0].name,
 					accountNumber: userContext.user.accountNumber,
-					creditLimit: accountObject[0].creditLimit,
+					creditLimit: accountObject[0].credit_limit,
 					balance: accountObject[0].amount,
 					type: accountObject[0].type,
 					isLoggedIn: true,
@@ -83,7 +83,8 @@ const DepositForm = () => {
 					</Stack>
 					<FormHelperText
 						fontSize='xs'
-						color='#ff0000'>
+						color='#ff0000'
+						textAlign={'left'}>
 						{errors.depositAmount && (
 							<span>You may only deposit between $1 and $1,000 dollars</span>
 						)}

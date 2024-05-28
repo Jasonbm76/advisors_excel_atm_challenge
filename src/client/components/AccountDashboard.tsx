@@ -16,21 +16,21 @@ const AccountDashboard = () => {
 	useEffect(() => {
 		if (userContext.user) {
 			setAccountType(userContext?.user?.type);
-			console.log(userContext.user);
+			//console.log(userContext.user);
 		}
 	}, [userContext]);
 
 	return (
 		userContext?.user?.isLoggedIn && (
 			<Flex
-				//width='full'
+				width='full'
 				align='center'
 				justifyContent='center'
 				margin='auto'
 				width='80%'>
 				<Box
 					p={8}
-					//maxWidth='1280px'
+					maxWidth='840px'
 					minWidth='600px'
 					minHeight='400px'
 					borderWidth={1}
@@ -59,7 +59,9 @@ const AccountDashboard = () => {
 								templateColumns='repeat(5, 1fr)'
 								gap={4}
 								mt={6}>
-								<GridItem colSpan={2}></GridItem>
+								<GridItem colSpan={2}>
+									<WithdrawalForm />
+								</GridItem>
 								<GridItem
 									colStart={4}
 									colEnd={6}>
