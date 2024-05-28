@@ -19,7 +19,7 @@ const DepositForm = () => {
 	const [singleDepositLimit, setSingleDepositLimit] = useState(1000);
 	const [accountBalance, setAccountBalance] = useState(0);
 	const [accountType, setAccountType] = useState('' as string);
-	const [depositAmount, setDepositAmount] = useState('' as string);
+	const [depositAmount, setDepositAmount] = useState('' as string); // assigned string instead of num to allow placeholder text to be displayed
 
 	const {
 		register,
@@ -31,7 +31,6 @@ const DepositForm = () => {
 
 	// Deposit money into an account
 	function depositMoney(amount: number) {
-		//console.log(Number(amount));
 		fetch(
 			`http://localhost:3000/account/${userContext?.user?.accountNumber}/deposit/${amount}`,
 			{
@@ -48,8 +47,6 @@ const DepositForm = () => {
 			.then((data) => {
 				let accountObject = JSON.parse(data);
 
-				//console.log(accountObject);
-
 				setAccountBalance(accountObject[0].amount);
 				setAccountType(accountObject[0].type);
 
@@ -63,6 +60,14 @@ const DepositForm = () => {
 				});
 			});
 	}
+
+	// Set the account balance and type once we have the user context which is needed to determine which UI to show
+	useEffect(() => {
+		if (userContext.user) {
+			setAccountBalance(userContext?.user?.balance);
+			setAccountType(userContext?.user?.type);
+		}
+	}, [userContext]);
 
 	// Reset the form after a successful submission
 	useEffect(() => {
@@ -136,7 +141,12 @@ const DepositForm = () => {
 		if (accountBalance === 0 && accountType === 'credit') {
 			reason = 'Congrats you have paid your balance in full!';
 		}
-		return <div>{reason}</div>;
+		return (
+			<>
+				{reason && <FormLabel>Make Deposit</FormLabel>}
+				<div>{reason}</div>
+			</>
+		);
 	}
 
 	return (
