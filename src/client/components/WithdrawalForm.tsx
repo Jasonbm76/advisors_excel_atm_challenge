@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 
 import {
 	Box,
 	Button,
 	FormControl,
-	FormLabel,
 	FormHelperText,
+	FormLabel,
 	Heading,
 	Input,
 	Stack,
@@ -23,7 +24,7 @@ const WithdrawalForm = () => {
 
 	const [accountType, setAccountType] = useState('' as string);
 	const [amountWithdrawnToday, setAmountWithdrawnToday] = useState(0);
-
+	const [showWithdrawalForm, setShowWithdrawalForm] = useState(true);
 	const [singleLimitPass, setSingleLimitPass] = useState(false);
 	const [dailyLimitPass, setDailyLimitPass] = useState(false);
 	const [multipleOfFivePass, setMultipleOfFivePass] = useState(false);
@@ -40,16 +41,19 @@ const WithdrawalForm = () => {
 
 	// Withdrawal money from an account
 	function withdrawalMoney(amount: number) {
-		fetch(
-			`http://localhost:3000/account/${userContext?.user?.accountNumber}/withdrawal/${amount}`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ amount }),
-			}
-		)
+		let url = `http://localhost:3000/account/${userContext?.user?.accountNumber}/withdrawal/${amount}`;
+
+		// Need a different URL for credit accounts
+		if (userContext.user.type === 'credit') {
+			url = `http://localhost:3000/account/${userContext?.user?.accountNumber}/advance/${amount}`;
+		}
+		fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ amount, type: userContext.user.type }),
+		})
 			.then((response) => {
 				return response.text();
 			})
@@ -75,13 +79,6 @@ const WithdrawalForm = () => {
 		withdrawalMoney(Number(data.withdrawalAmount));
 	};
 
-	// Reset the form after a successful submission
-	useEffect(() => {
-		if (formState.isSubmitSuccessful) {
-			reset();
-		}
-	}, [formState, reset]);
-
 	// User has no credit available
 	function NoCreditAvailableMessage() {
 		return (
@@ -99,10 +96,17 @@ const WithdrawalForm = () => {
 
 	// Check the withdrawal rules to determine if the withdrawal button should be disabled
 	function checkWithdrawalRules(num: number) {
+		// This is the standard check for a checking/savings account
+		let inSufficientFundsCheck = num <= userContext.user.balance === true;
+
+		// Check if the user has enough funds on their credit card
+		if (userContext.user.type === 'credit') {
+			inSufficientFundsCheck =
+				num <= userContext.user.creditLimit - userContext.user.balance;
+		}
+
 		// Check if the user has the funds available
-		// setHasTheFunds(num <= parseInt(userContext?.user?.balance));
-		// console.log('hasTheFunds', hasTheFunds);
-		// console.info(typeof userContext.user.balance);
+		setHasTheFunds(inSufficientFundsCheck);
 
 		// Make sure the input is not empty
 		setInputNotEmpty(num > 0);
@@ -113,23 +117,58 @@ const WithdrawalForm = () => {
 		// Single withdrawal limit
 		setSingleLimitPass(num <= 200);
 
+		/*** TODO: Would really need to modify the database to prevent the user from simply refreshing the page or logging out to reset this ***/
 		// Ensure we are under our daily withdrawal limit
 		setDailyLimitPass(amountWithdrawnToday + num <= dailyWithdrawalLimit);
 	}
 
-	// function CCWithdrawalFormOld() {
-	// 	let returnObj = {};
-	// 	let availableCredit =
-	// 		userContext?.user?.creditLimit - userContext?.user?.balance;
+	// Reset the form after a successful submission
+	useEffect(() => {
+		if (formState.isSubmitSuccessful) {
+			reset();
+		}
+	}, [formState, reset]);
 
-	// 	return returnObj;
-	// }
+	// Determine which UI to show based on the user's account type and balance
+	// this is necessary if the user has a balance of 0 but then makes a deposit
+	useEffect(() => {
+		let cl = userContext.user.creditLimit;
+		let bal = userContext.user.balance;
+		let type = userContext.user.type;
 
-	// <NoCreditAvailableMessage />
+		// Credit accounts
+		if (type === 'credit') {
+			if (cl - bal <= 0) {
+				setShowWithdrawalForm(false);
+			} else {
+				setShowWithdrawalForm(true);
+			}
+		}
+
+		// Checking/Savings accounts
+		if (type !== 'credit') {
+			if (bal <= 0) {
+				setShowWithdrawalForm(false);
+			} else {
+				setShowWithdrawalForm(true);
+			}
+		}
+	}, [userContext.user]);
 
 	return (
 		<>
-			<div className=''>
+			{/* No credit available */}
+			<div className={showWithdrawalForm ? 'd-none' : ''}>
+				<FormLabel>Make Withdrawal</FormLabel>
+				<Heading
+					as='h6'
+					size='xs'>
+					Withdrawal is not available for this account at this time.
+				</Heading>
+			</div>
+
+			{/* Standard Withdrawal Form */}
+			<div className={showWithdrawalForm ? '' : 'd-none'}>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<FormControl>
 						<FormLabel>Make Withdrawal</FormLabel>
@@ -137,6 +176,7 @@ const WithdrawalForm = () => {
 							direction={['column', 'row']}
 							spacing='10px'>
 							<Input
+								{...register('withdrawalAmount', {})}
 								type='number'
 								id='withdrawalAmount'
 								placeholder='Enter withdrawal amount'
@@ -176,6 +216,9 @@ const WithdrawalForm = () => {
 							<li className={dailyLimitPass ? 'd-none' : ''}>
 								Daily Withdrawal Limit ${dailyWithdrawalLimit}
 							</li>
+							<li className={hasTheFunds ? 'd-none' : ''}>
+								Insufficient Funds
+							</li>
 						</ul>
 					</Box>
 				</form>
@@ -185,109 +228,3 @@ const WithdrawalForm = () => {
 };
 
 export default WithdrawalForm;
-
-/*
-if (userContext.user.balance === 0) {
-					console.log('balance is 0');
-				}
-*/
-
-/*
-// We need to get the amount due on the credit card to determine the max value for the input
-	useEffect(() => {
-		if (userContext.user) {
-			let balance = parseInt(userContext?.user?.balance);
-			switch (userContext?.user?.type) {
-				case 'credit':
-					setMaxWithdrawalAmount(
-						userContext?.user?.creditLimit -
-							Math.abs(userContext?.user?.balance)
-					);
-					break;
-				default:
-					// User has a balance higher than the single withdrawal limit
-					if (balance > singleWithdrawalLimit) {
-						setMaxWithdrawalAmount(singleWithdrawalLimit);
-					}
-					break;
-			}
-			// setMaxWithdrawalAmount(
-			// 	(userContext?.user?.type !== 'credit'
-			// 		? Math.abs(balance)
-			// 		: userContext?.user?.creditLimit) -
-			// 		Math.abs(userContext?.user?.balance)
-			// );
-			setAccountType(userContext?.user?.type);
-
-			//console.log('accountType (withdrawalForm)', accountType);
-			//console.log(userContext.user);
-		}
-	}, [userContext]);
-*/
-
-/*
-<div>
-			{maxWithdrawalAmount > 0 ? (
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<FormControl>
-						<FormLabel>Make Withdrawal</FormLabel>
-						<Stack
-							direction={['column', 'row']}
-							spacing='10px'>
-							<Input
-								{...register('withdrawalAmount', {
-									min: 5,
-									max: maxWithdrawalAmount,
-									pattern: /^[0-9]*[05]$/,
-								})}
-								type='number'
-								id='withdrawalAmount'
-								placeholder='Enter withdrawal amount'
-							/>
-
-							<Button
-								type='submit'
-								value='Withdrawal'
-								colorScheme='blue'>
-								Submit
-							</Button>
-						</Stack>
-						<FormHelperText
-							fontSize='xs'
-							color='#ff0000'
-							textAlign={'left'}>
-							{errors.withdrawalAmount && (
-								<span>
-									{`Amount must be between $5 and $${maxWithdrawalAmount.toLocaleString()} dollars in increments of $5.`}
-								</span>
-							)}
-						</FormHelperText>
-					</FormControl>
-
-					<Box
-						w='100%'
-						p={4}>
-						<ul className='withdrawal-reqs'>
-							<li>Withdrawal must be in increments of $5</li>
-							<li className={accountType === 'credit' ? 'd-none' : ''}>
-								Single Withdrawal Limit ${singleWithdrawalLimit}
-							</li>
-							<li className={accountType === 'credit' ? 'd-none' : ''}>
-								Daily Withdrawal Limit ${dailyWithdrawalLimit}
-							</li>
-						</ul>
-					</Box>
-				</form>
-			) : (
-				<>
-					<FormLabel>Make Withdrawal</FormLabel>
-					<Heading
-						as='h6'
-						size='xs'>
-						Withdrawal is not available for this account due to balance being
-						$0.
-					</Heading>
-				</>
-			)}
-		</div>
-*/

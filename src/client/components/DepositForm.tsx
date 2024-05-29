@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 
 import {
 	Box,
 	Button,
 	FormControl,
-	FormLabel,
 	FormHelperText,
+	FormLabel,
 	Input,
 	Stack,
 } from '@chakra-ui/react';
@@ -31,16 +32,19 @@ const DepositForm = () => {
 
 	// Deposit money into an account
 	function depositMoney(amount: number) {
-		fetch(
-			`http://localhost:3000/account/${userContext?.user?.accountNumber}/deposit/${amount}`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ amount }),
-			}
-		)
+		let url = `http://localhost:3000/account/${userContext?.user?.accountNumber}/deposit/${amount}`;
+
+		// Need a different URL for credit accounts
+		if (userContext.user.type === 'credit') {
+			url = `http://localhost:3000/account/${userContext?.user?.accountNumber}/payment/${amount}`;
+		}
+		fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ amount, type: userContext.user.type }),
+		})
 			.then((response) => {
 				return response.text();
 			})

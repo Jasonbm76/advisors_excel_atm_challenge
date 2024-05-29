@@ -5,4 +5,5 @@
 
 ### Running the app
 
-Run `yarn dev` to start the app and then navigate to http://localhost:3000/app to view it
+3. Run `yarn dev` to start the app and then
+4. Navigate to `http://localhost:3000/app` to view it

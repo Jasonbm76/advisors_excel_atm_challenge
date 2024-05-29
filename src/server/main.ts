@@ -28,26 +28,12 @@ app.get('/account/:id', (req, res) => {
 		});
 });
 
-// Update by depositing into an individual account
+// Update by depositing into an individual checking/savings account
 app.post('/account/:id/deposit/:amount', (req, res) => {
 	const id = req.params.id;
 	const amount = req.body.amount;
 	account_model
 		.depositIntoAccount(id, amount)
-		.then((response: any) => {
-			res.status(200).send(response);
-		})
-		.catch((error: any) => {
-			res.status(500).send(error);
-		});
-});
-
-// Update by withdrawing from an individual account
-app.post('/account/:id/withdrawal/:amount', (req, res) => {
-	const id = req.params.id;
-	const amount = req.body.amount;
-	account_model
-		.withdrawalFromAccount(id, amount)
 		.then((response: any) => {
 			res.status(200).send(response);
 		})
@@ -62,6 +48,34 @@ app.post('/account/:id/payment/:amount', (req, res) => {
 	const amount = req.body.amount;
 	account_model
 		.makePaymentIntoAccount(id, amount)
+		.then((response: any) => {
+			res.status(200).send(response);
+		})
+		.catch((error: any) => {
+			res.status(500).send(error);
+		});
+});
+
+// Update by withdrawing from an individual checking/savings account
+app.post('/account/:id/withdrawal/:amount', (req, res) => {
+	const id = req.params.id;
+	const amount = req.body.amount;
+	account_model
+		.withdrawalFromAccount(id, amount)
+		.then((response: any) => {
+			res.status(200).send(response);
+		})
+		.catch((error: any) => {
+			res.status(500).send(error);
+		});
+});
+
+// Update by withdrawing from an individual credit card account
+app.post('/account/:id/advance/:amount', (req, res) => {
+	const id = req.params.id;
+	const amount = req.body.amount;
+	account_model
+		.withdrawalFromCCAccount(id, amount)
 		.then((response: any) => {
 			res.status(200).send(response);
 		})

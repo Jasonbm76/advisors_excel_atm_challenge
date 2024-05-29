@@ -9,11 +9,11 @@ import {
 	Link,
 	Spacer,
 } from '@chakra-ui/react';
-import { UserContext } from '../context/UserContext';
-import { AccountTable } from './AccountTable';
+
 import DepositForm from './DepositForm';
+import { AccountTable } from './AccountTable';
 import WithdrawalForm from './WithdrawalForm';
-import MakePaymentForm from './MakePaymentForm';
+import { UserContext } from '../context/UserContext';
 
 const AccountDashboard = () => {
 	const userContext = useContext(UserContext);
@@ -35,7 +35,6 @@ const AccountDashboard = () => {
 	useEffect(() => {
 		if (userContext.user) {
 			setAccountType(userContext?.user?.type);
-			//console.log(userContext.user);
 		}
 	}, [userContext]);
 
